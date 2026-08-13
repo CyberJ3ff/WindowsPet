@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>待办管理</title>
+<link rel="stylesheet" href="panel.css"/>
+</head>
+<body class="todo-page">
+<div class="panel">
+  <header class="panel-header">
+    <h2>📝 待办管理</h2>
+    <div class="filter-tabs">
+      <button class="tab active" data-f="all">全部</button>
+      <button class="tab" data-f="unfinished">未完成</button>
+      <button class="tab" data-f="done">已完成</button>
+      <button class="btn btn-sm btn-close" id="btn-close" title="关闭">✕</button>
+    </div>
+  </header>
+
+  <!-- 新增/编辑表单 -->
+  <section class="form-card">
+    <h3 id="form-title">新增待办</h3>
+    <input type="hidden" id="f-id" value=""/>
+    <div class="row">
+      <label>标题 <span class="r">*</span></label>
+      <input type="text" id="f-title" placeholder="请输入待办标题" maxlength="100"/>
+    </div>
+    <div class="row">
+      <label>内容</label>
+      <textarea id="f-content" rows="3" placeholder="详细内容（可选）" maxlength="500"></textarea>
+    </div>
+    <div class="row two-col">
+      <div>
+        <label>截止时间</label>
+        <input type="datetime-local" id="f-deadline"/>
+      </div>
+      <div>
+        <label>优先级</label>
+        <select id="f-priority">
+          <option value="0">低</option>
+          <option value="1" selected>中</option>
+          <option value="2">高</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-actions">
+      <button class="btn btn-primary" id="btn-save">💾 保存</button>
+      <button class="btn" id="btn-reset" type="button">重置</button>
+    </div>
+  </section>
+
+  <!-- 待办列表 -->
+  <section class="list-card">
+    <div class="list-header">
+      <span>待办列表</span>
+      <span id="list-count" class="muted"></span>
+    </div>
+    <div id="todo-list" class="todo-list">
+      <!-- 动态渲染 -->
+    </div>
+  </section>
+</div>
+<script src="panel.js"></script>
+<script>
+(function() {
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initTodoPanel);
+  } else {
+    initTodoPanel();
+  }
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,329 @@
+/* =============================================================
+   桌宠主界面样式：透明背景 + CSS 动画状态机
+   预留接口：若要使用自定义序列帧，把 .pet-svg 隐藏，
+   为 .pet-sprite-slot 设置 background-image 并通过
+   state-* 类切换 / 控制 animation 的 steps()
+   ============================================================= */
+
+/* 页面整体：完全透明，铺满窗口 */
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  background: transparent;
+  overflow: hidden;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  user-select: none;
+  -webkit-user-select: none;
+  font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+}
+
+/* 桌宠根容器：可拖拽，固定基础尺寸，通过 transform: scale 整体缩放 */
+.pet-root {
+  position: relative;
+  width: 180px;
+  height: 340px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  cursor: grab;
+  transform: scale(var(--pet-scale));
+  transform-origin: center bottom;
+  transition: transform .2s ease;
+}
+.pet-root:active { cursor: grabbing; }
+
+/* ============== 气泡 ============== */
+.bubble {
+  position: absolute;
+  left: 50%;
+  bottom: 180px;
+  transform: translateX(-50%);
+  width: 160px;
+  background: rgba(255, 255, 255, 0.98);
+  border: 1px solid rgba(0,0,0,0.1);
+  border-radius: 10px;
+  padding: 6px 8px;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+  z-index: 10;
+  animation: bubble-in 180ms ease-out;
+  color: #333;
+  font-size: 11px;
+  line-height: 1.35;
+  box-sizing: border-box;
+}
+.bubble.hidden { display: none; }
+.bubble-text { word-wrap: break-word; font-weight: 600; margin-bottom: 4px; font-size: 11px; }
+.bubble-actions { display: flex; flex-wrap: wrap; gap: 3px; margin-top: 4px; }
+.bubble-list { margin-top: 3px; max-height: 72px; overflow-y: auto; }
+.bubble-list .todo-item {
+  display: flex; align-items: center; gap: 3px;
+  padding: 2px 2px; border-bottom: 1px dashed #eee;
+}
+.bubble-list .todo-item:last-child { border-bottom: none; }
+.bubble-list .todo-title { flex: 1; font-size: 10.5px; }
+.bubble-list .todo-title.p-high { color: #e53935; font-weight: 600; }
+.bubble-list .todo-title.p-low { color: #777; }
+.bubble-list .btn-done {
+  font-size: 9px; padding: 1px 4px; border-radius: 3px;
+  border: 1px solid #81c784; background: #e8f5e9; color: #2e7d32; cursor: pointer;
+}
+.bubble-tail {
+  position: absolute; left: 50%; bottom: -6px;
+  transform: translateX(-50%);
+  width: 0; height: 0;
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-top: 6px solid rgba(255,255,255,0.98);
+  filter: drop-shadow(0 1px 0 rgba(0,0,0,0.08));
+}
+
+.btn {
+  padding: 5px 10px;
+  font-size: 12px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  background: #fafafa;
+  color: #333;
+  cursor: pointer;
+  transition: all .15s;
+  font-family: inherit;
+  white-space: nowrap;
+}
+.btn:hover { background: #f0f0f0; transform: translateY(-1px); }
+.btn-primary {
+  background: #ff7043;
+  border-color: #e64a19;
+  color: #fff;
+}
+.btn-primary:hover { background: #f4511e; }
+.bubble-actions .btn {
+  flex: 1;
+  min-width: 52px;
+  font-weight: 600;
+  border-radius: 10px;
+  font-size: 10.5px;
+  padding: 4px 6px;
+}
+
+@keyframes bubble-in {
+  from { opacity: 0; transform: translate(-50%, 10px) scale(0.96); }
+  to   { opacity: 1; transform: translate(-50%, 0) scale(1); }
+}
+
+/* ============== 桌宠本体 ============== */
+.pet-body {
+  position: relative;
+  width: 140px;
+  height: 170px;
+  overflow: visible;
+}
+
+.pet-sprite-slot {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+/* SVG 尺寸自适应 */
+.pet-svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+  overflow: visible;
+}
+
+/* ============== 状态：Idle 待机（轻微晃动 + 眨眼） ============== */
+.state-idle {
+  animation: idle-bob 3.6s ease-in-out infinite;
+}
+.state-idle .eye-l, .state-idle .eye-r {
+  animation: blink 4.8s infinite;
+  transform-origin: center;
+}
+@keyframes idle-bob {
+  0%,100% { transform: translateY(0) rotate(-1.5deg); }
+  50%     { transform: translateY(-4px) rotate(1.5deg); }
+}
+@keyframes blink {
+  0%, 92%, 100% { transform: scaleY(1); }
+  95%           { transform: scaleY(0.1); }
+}
+
+/* ============== 状态：Remind 提醒（踱步 + 抖动） ============== */
+.state-remind {
+  animation: remind-step 0.9s ease-in-out infinite;
+}
+.state-remind .body-group {
+  animation: remind-shake 0.28s ease-in-out infinite;
+}
+.state-remind .antenna circle {
+  animation: remind-glow 0.6s ease-in-out infinite alternate;
+}
+@keyframes remind-step {
+  0%,100% { transform: translateX(-14px) rotate(-3deg); }
+  50%     { transform: translateX(14px) rotate(3deg); }
+}
+@keyframes remind-shake {
+  0%,100% { transform: translateY(0); }
+  50%     { transform: translateY(-6px); }
+}
+@keyframes remind-glow {
+  from { fill: #ff7043; r: 4.5; }
+  to   { fill: #ff1744; r: 6; }
+}
+
+/* ============== 状态：Talk 气泡说话（轻微点头） ============== */
+.state-talk {
+  animation: talk-nod 0.9s ease-in-out infinite;
+}
+@keyframes talk-nod {
+  0%,100% { transform: rotate(-1deg); }
+  50%     { transform: rotate(2deg) translateY(-2px); }
+}
+
+/* ============== 状态：Sleep 休眠（降低动画频率） ============== */
+.state-sleep {
+  animation: sleep-breath 5s ease-in-out infinite;
+  opacity: 0.78;
+}
+.state-sleep .eye-l .pupil,
+.state-sleep .eye-r .pupil { display: none; }
+.state-sleep .eye-l,
+.state-sleep .eye-r {
+  /* 闭眼 → 画两条横线 */
+}
+.state-sleep .eye-l ellipse,
+.state-sleep .eye-r ellipse {
+  transform: scaleY(0.1);
+}
+.state-sleep .mouth {
+  d: path("M52 100 Q60 96 68 100");
+}
+.state-sleep .antenna {
+  animation: sleep-zzz 2.6s ease-in-out infinite;
+  transform-origin: 60px 38px;
+}
+@keyframes sleep-breath {
+  0%,100% { transform: scale(0.98) translateY(2px); }
+  50%     { transform: scale(1.00) translateY(-1px); }
+}
+@keyframes sleep-zzz {
+  0%,100% { transform: rotate(-3deg); }
+  50%     { transform: rotate(3deg); }
+}
+
+/* ============== 状态：Interactive 交互（打招呼，跳跃一次） ============== */
+.state-interactive {
+  animation: interactive-jump 0.55s ease-out 1;
+}
+.state-interactive .hand-r {
+  animation: wave-hand 0.45s ease-out 2;
+  transform-origin: 104px 70px;
+}
+@keyframes interactive-jump {
+  0%   { transform: translateY(0); }
+  40%  { transform: translateY(-18px) scale(1.03, 0.97); }
+  100% { transform: translateY(0); }
+}
+@keyframes wave-hand {
+  0%,100% { transform: rotate(0); }
+  50%     { transform: rotate(-35deg); }
+}
+
+/* ============== 缩放变量 ============== */
+:root { --pet-scale: 1; }
+
+/* ============== 右键自定义菜单 ============== */
+.ctx-menu {
+  position: absolute;
+  left: 50%;
+  bottom: 5px;
+  transform: translateX(-50%);
+  min-width: 120px;
+  background: rgba(255, 255, 255, 0.97);
+  border: 1px solid rgba(0,0,0,0.12);
+  border-radius: 8px;
+  padding: 3px 0;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+  z-index: 20;
+  animation: ctx-in 120ms ease-out;
+}
+.ctx-menu.hidden { display: none; }
+.ctx-menu-item {
+  padding: 5px 10px;
+  font-size: 11px;
+  color: #333;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background .12s;
+  text-align: center;
+}
+.ctx-menu-item:hover {
+  background: rgba(255, 112, 67, 0.12);
+  color: #e65100;
+}
+.ctx-menu-danger {
+  color: #e53935;
+}
+.ctx-menu-danger:hover {
+  background: rgba(229, 57, 53, 0.1);
+  color: #c62828;
+}
+.ctx-menu-sep {
+  height: 1px;
+  margin: 4px 8px;
+  background: rgba(0,0,0,0.08);
+}
+@keyframes ctx-in {
+  from { opacity: 0; transform: translate(-50%, -6px) scale(0.95); }
+  to   { opacity: 1; transform: translate(-50%, 0) scale(1); }
+}
+
+/* ============== 自定义弹窗模态框（小尺寸适配桌宠窗口） ============== */
+.custom-modal {
+  display: none;
+  position: fixed; inset: 0; z-index: 9999;
+}
+.custom-modal.show { display: block; }
+.custom-modal-mask {
+  position: absolute; inset: 0;
+  background: rgba(0,0,0,0.35);
+  animation: fade-in .15s;
+}
+.custom-modal-box {
+  position: absolute; top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  background: #fff; border-radius: 12px;
+  padding: 14px 14px 10px;
+  width: 140px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+  animation: modal-in .18s ease-out;
+}
+.custom-modal-msg {
+  font-size: 12px; color: #333; margin-bottom: 12px;
+  line-height: 1.4; text-align: center;
+  word-break: break-all;
+}
+.custom-modal-actions {
+  display: flex; gap: 6px; justify-content: center;
+}
+.ctx-btn {
+  padding: 5px 10px; font-size: 12px;
+  border: 1px solid #ddd; background: #fafafa;
+  border-radius: 6px; cursor: pointer; color: #333;
+  transition: all .15s; font-family: inherit;
+}
+.ctx-btn:hover { background: #f0f0f0; }
+.ctx-btn-primary {
+  background: #ff7043; color: #fff; border-color: #e64a19;
+}
+.ctx-btn-primary:hover { background: #f4511e; }
+@keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes modal-in {
+  from { opacity: 0; transform: translate(-50%, -50%) scale(0.9); }
+  to   { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+}

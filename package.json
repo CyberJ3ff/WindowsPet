@@ -1,0 +1,26 @@
+{
+  "name": "windows-pet",
+  "version": "1.0.0",
+  "description": "Windows轻量待办提醒桌宠软件",
+  "license": "MIT",
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-username/windows-pet.git"
+  },
+  "keywords": [
+    "tauri",
+    "desktop-pet",
+    "todo",
+    "windows",
+    "reminder"
+  ],
+  "scripts": {
+    "dev": "tauri dev",
+    "build": "tauri build",
+    "preview": "tauri dev --release"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^2.0.0"
+  }
+}
