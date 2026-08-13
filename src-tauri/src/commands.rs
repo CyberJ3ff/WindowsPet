@@ -225,6 +225,55 @@ fn show_panel(app: &AppHandle, label: &str) {
     }
 }
 
+// ============ 草稿纸 ============
+
+#[command]
+pub fn open_sticky_window(app: AppHandle) -> Result<(), String> {
+    show_panel(&app, "sticky");
+    Ok(())
+}
+
+#[command]
+pub fn sticky_load() -> Result<String, String> {
+    let path = sticky_path();
+    if let Ok(content) = std::fs::read_to_string(&path) {
+        if let Ok(val) = serde_json::from_str::<serde_json::Value>(&content) {
+            if let Some(html) = val.get("content").and_then(|v| v.as_str()) {
+                return Ok(html.to_string());
+            }
+        }
+    }
+    Ok(String::new())
+}
+
+#[command]
+pub fn sticky_save(content: String) -> Result<(), String> {
+    let path = sticky_path();
+    if let Some(parent) = path.parent() {
+        let _ = std::fs::create_dir_all(parent);
+    }
+    let json = serde_json::json!({ "content": content });
+    let json_str = serde_json::to_string_pretty(&json).map_err(|e| e.to_string())?;
+    std::fs::write(&path, json_str).map_err(|e| e.to_string())?;
+    Ok(())
+}
+
+fn sticky_path() -> std::path::PathBuf {
+    let dir = dirs::data_local_dir()
+        .unwrap_or_else(|| std::path::PathBuf::from("."))
+        .join("WindowsPet");
+    dir.join("sticky.json")
+}
+
+#[command]
+pub fn sticky_hide(app: AppHandle) -> Result<(), String> {
+    // 安全兜底：通过 Rust 端隐藏 sticky 窗口（避免前端 window.close() 造成白屏）
+    if let Some(win) = app.get_webview_window("sticky") {
+        let _ = win.hide();
+    }
+    Ok(())
+}
+
 // ============ 退出 ============
 
 #[command]

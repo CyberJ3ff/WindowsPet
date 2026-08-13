@@ -329,6 +329,9 @@ function bindContextMenu() {
       case 'todo':
         try { await invoke('open_todo_window'); } catch (err) { modalAlert(String(err)); }
         break;
+      case 'sticky':
+        try { await invoke('open_sticky_window'); } catch (err) { modalAlert(String(err)); }
+        break;
       case 'settings':
         try { await invoke('open_settings_window'); } catch (err) { modalAlert(String(err)); }
         break;

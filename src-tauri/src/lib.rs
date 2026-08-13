@@ -51,6 +51,10 @@ pub fn run() {
             commands::snooze_reminder,
             commands::open_todo_window,
             commands::open_settings_window,
+            commands::open_sticky_window,
+            commands::sticky_load,
+            commands::sticky_save,
+            commands::sticky_hide,
             commands::quit_app,
         ])
         .on_window_event(|window, event| {
@@ -65,7 +69,7 @@ pub fn run() {
                     api.prevent_close();
                 }
                 // 面板窗口关闭时隐藏（而非销毁，避免空白/卡死）
-                else if window.label() == "todo" || window.label() == "settings" {
+                else if matches!(window.label(), "todo" | "settings" | "sticky") {
                     let _ = window.hide();
                     api.prevent_close();
                 }
@@ -114,15 +118,32 @@ fn setup_app(app: &mut App) -> anyhow::Result<()> {
     create_panel_window(app, "todo", "/todo.html", "待办管理", 640.0, 560.0)?;
     create_panel_window(app, "settings", "/settings.html", "设置", 480.0, 520.0)?;
 
-    // 6. 托盘
+    // 6. 预创建草稿纸窗口（无边框、置顶、可拖拽、不在任务栏显示）
+    tauri::WebviewWindowBuilder::new(
+        app, "sticky", tauri::WebviewUrl::App("/sticky.html".into())
+    )
+        .title("草稿纸")
+        .inner_size(300.0, 380.0)
+        .min_inner_size(200.0, 200.0)
+        .decorations(false)
+        .transparent(false)
+        .resizable(true)
+        .always_on_top(true)
+        .skip_taskbar(true)
+        .visible(false)
+        .position(200.0, 200.0)
+        .build()?;
+    log::info!("草稿纸窗口已预创建");
+
+    // 7. 托盘
     tray::create_tray(app.handle())?;
     log::info!("系统托盘创建完成");
 
-    // 7. 空闲检测线程（每秒轮询1次）
+    // 8. 空闲检测线程（每秒轮询1次）
     let app_handle = handle.clone();
     std::thread::spawn(move || idle::run_idle_monitor(app_handle));
 
-    // 8. 每日提醒线程
+    // 9. 每日提醒线程
     let app_handle2 = handle.clone();
     std::thread::spawn(move || idle::run_daily_reminder(app_handle2));
 

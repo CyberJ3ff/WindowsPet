@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>草稿纸</title>
+  <link rel="stylesheet" href="sticky.css" />
+</head>
+<body>
+  <div class="sticky-note">
+    <!-- 自定义标题栏（可拖拽） -->
+    <div class="sticky-header">
+      <span class="sticky-title">📝 草稿纸</span>
+      <div class="sticky-tools">
+        <button class="tool-btn" id="btn-clear" title="清空内容">🗑</button>
+        <button class="tool-btn" id="btn-close" title="关闭">✕</button>
+      </div>
+    </div>
+
+    <!-- 编辑区 -->
+    <div class="sticky-body">
+      <div id="editor" class="sticky-editor" contenteditable="true" spellcheck="false"></div>
+    </div>
+
+    <!-- 底部状态栏 -->
+    <div class="sticky-footer">
+      <span class="sticky-hint">支持粘贴文字和图片（Ctrl+V）</span>
+      <span class="sticky-status" id="save-status"></span>
+    </div>
+  </div>
+
+  <script src="sticky.js"></script>
+</body>
+</html>

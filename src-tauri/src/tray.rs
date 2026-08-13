@@ -15,6 +15,7 @@ pub fn create_tray(app: &AppHandle) -> Result<()> {
     let show_pet = MenuItem::with_id(app, "show_pet", "显示桌宠", true, None::<&str>)?;
     let hide_pet = MenuItem::with_id(app, "hide_pet", "隐藏桌宠", true, None::<&str>)?;
     let todo_panel = MenuItem::with_id(app, "todo_panel", "打开待办管理", true, None::<&str>)?;
+    let sticky_item = MenuItem::with_id(app, "sticky", "草稿纸", true, None::<&str>)?;
     let settings_item = MenuItem::with_id(app, "settings", "设置", true, None::<&str>)?;
     let sep1 = PredefinedMenuItem::separator(app)?;
     let sep2 = PredefinedMenuItem::separator(app)?;
@@ -22,7 +23,7 @@ pub fn create_tray(app: &AppHandle) -> Result<()> {
 
     let menu = Menu::with_items(
         app,
-        &[&show_pet, &hide_pet, &sep1, &todo_panel, &settings_item, &sep2, &quit],
+        &[&show_pet, &hide_pet, &sep1, &todo_panel, &sticky_item, &settings_item, &sep2, &quit],
     )?;
 
     // 构造托盘图标：生成 26x26 橙色 RGBA 图标
@@ -37,6 +38,7 @@ pub fn create_tray(app: &AppHandle) -> Result<()> {
             "show_pet" => show_window(app, "pet"),
             "hide_pet" => hide_window(app, "pet"),
             "todo_panel" => open_or_focus(app, "todo", "/todo.html", 640.0, 560.0),
+            "sticky"     => open_or_focus(app, "sticky", "/sticky.html", 300.0, 380.0),
             "settings"   => open_or_focus(app, "settings", "/settings.html", 480.0, 520.0),
             "quit" => {
                 IS_QUITTING.store(true, Ordering::SeqCst);
